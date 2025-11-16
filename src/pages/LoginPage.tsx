@@ -3,7 +3,7 @@ import LoginForm from "../components/LoginForm"
 const LoginPage = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden md:flex-row">
-      <div className="flex lg:w-1/2 h-screen overflow-hidden items-center justify-center">
+      <div className="flex md:w-1/2 h-screen overflow-hidden items-center justify-center">
         <img
           src="/LoginImg.jpeg"
           alt="Login Illustration"
