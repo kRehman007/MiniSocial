@@ -39,7 +39,7 @@ const SignupForm = () => {
       };
   return (
     <div className="w-full max-w-md mx-auto md:bg-white md:shadow-xl md:rounded-2xl p-4 md:p-8 md:border md:border-gray-200">
-      <h2 className="text-3xl font-bold mb-2 text-center text-gray-900">Create Account</h2>
+      <h2 className="text-3xl font-bold mb-2 text-center text-gray-900">Create Your Account</h2>
       <p className="text-sm text-gray-500 mb-8 text-center">Sign up to continue to your account</p>
 
         <ScrollArea className="h-[340px] md:h-auto pr-2">

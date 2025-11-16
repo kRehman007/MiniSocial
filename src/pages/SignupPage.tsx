@@ -11,7 +11,7 @@ const SignupPage = () => {
         />
       </div>
 
-      <div className="flex flex-1 items-center md:px-5 justify-center -mt-20 md:mt-0 rounded-tl-3xl  bg-white rounded-tr-3xl md:rounded-none">
+      <div className="flex flex-1 items-center md:px-5 justify-center -mt-32 md:mt-0 rounded-tl-3xl  bg-white rounded-tr-3xl md:rounded-none">
         <SignupForm />
       </div>
     </div>
