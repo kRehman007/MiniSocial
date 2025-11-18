@@ -2,7 +2,7 @@ import SignupForm from "../components/SignupForm"
 
 const SignupPage = () => {
   return (
-   <div className="h-[85vh] md:h-screen flex flex-col overflow-hidden md:flex-row">
+   <div className="h-[95vh] md:h-screen flex flex-col overflow-hidden md:flex-row">
       <div className="flex md:w-1/2 h-1/2 md:h-screen overflow-hidden items-center justify-center">
         <img
           src="/LoginImg.jpeg"
