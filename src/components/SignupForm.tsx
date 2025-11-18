@@ -37,7 +37,7 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 const SignupForm = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [selectedRole, setSelectedRole] = useState('consumer');
+  const [selectedRole, setSelectedRole] = useState('creator');
   const navigate = useNavigate();
   const setUser = useAuthStore((state) => state.setUser);
 
@@ -50,7 +50,7 @@ const SignupForm = () => {
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      role: 'consumer',
+      role: 'creator',
     },
   });
 

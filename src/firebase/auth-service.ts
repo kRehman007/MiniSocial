@@ -71,4 +71,21 @@ export const authService = {
       throw error;
     }
   },
+
+  async deleteAccount() {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        await user.delete();
+        // await deleteDoc(doc(db, 'users', user.uid));
+        await signOut(auth);
+        console.log('User account deleted successfully');
+      } catch (error) {
+        console.error('Account deletion error:', error);
+        throw error;
+      } 
+    } else {
+      throw new Error('No authenticated user found');
+    }
+}
 };
