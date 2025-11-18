@@ -90,9 +90,8 @@ const LoginForm = () => {
 
   return (
     <div className="w-full max-w-md mx-auto md:bg-white md:shadow-xl md:rounded-2xl p-4 md:p-8 md:border md:border-gray-200">
-      <h2 className="text-3xl font-bold mb-2 text-center text-gray-900">Welcome Back here</h2>
+      <h2 className="text-3xl font-bold mb-2 text-center text-gray-900 mt-3">Welcome Back here</h2>
       <p className="text-sm text-gray-500 mb-8 text-center">Sign in to continue to your account</p>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Email */}
         <div className="space-y-2">
