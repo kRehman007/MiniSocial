@@ -25,6 +25,7 @@ import { useAuthStore } from "@/zustand/useAuthStore";
 import { authService } from "@/firebase/auth-service";
 import toast from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import CustomLoader from "@/lib/loader";
 
 const Navbar = () => {
   const { clearUser, user } = useAuthStore();
@@ -47,7 +48,6 @@ const Navbar = () => {
 
   const handleDeleteAccount = async () => {
     if (!user) return;
-    
     setIsDeleting(true);
     try {
       await authService.deleteAccount()
@@ -292,7 +292,7 @@ const Navbar = () => {
               disabled={isDeleting}
               className="bg-red-600 cursor-pointer hover:bg-red-700 focus:ring-red-600"
             >
-              {isDeleting ? "Deleting..." : "Delete Account"}
+              {isDeleting ? <CustomLoader /> : "Delete Account"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

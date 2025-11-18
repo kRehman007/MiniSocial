@@ -11,7 +11,7 @@ const LoginPage = () => {
         />
       </div>
 
-      <div className="flex flex-1 items-center md:px-5 justify-center -mt-6 md:mt-0 rounded-tl-3xl  bg-white rounded-tr-3xl md:rounded-none">
+      <div className="flex flex-1 items-center md:px-5 justify-center -mt-36 md:mt-0 rounded-tl-3xl  bg-white rounded-tr-3xl md:rounded-none">
         <LoginForm />
       </div>
     </div>
