@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash,  Heart, Send, MessageCircle } from "lucide-react";
 import CreatePostModal from "@/components/modal/CreatePostModal";
+import DeletePostModal from "@/components/modal/DeletePostModal";
 import type {  Post } from "@/lib/interface";
-import DeletePostModal from "@/components/modal/deletePostModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const CreatorHomePage = () => {
