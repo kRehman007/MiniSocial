@@ -1,46 +1,49 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useNavigate } from "react-router-dom"
 import { AllRoutes } from "./lib/route"
 import ProtectedRoute from "./lib/ProtectedRoute"
 import { useEffect } from "react";
 import { useAuthStore } from "./zustand/useAuthStore";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth} from "./firebase/firebaseConfig";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
+import { account, databases } from "./appwrite/appwriteConfig";
+import { URL } from "./lib/URL";
+import { conf } from "./lib/conf";
 
 function App() {
+  const navigate=useNavigate()
 const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // try {
-        //   const userDoc = await getDoc(doc(db, 'users', user.uid));
-          
-        //   if (userDoc.exists()) {
-        //     const userData = userDoc.data() as User;
-        //     setUser(userData);
-        //   } else {
-        //     console.warn('User document not found in Firestore');
-        //     clearUser();
-        //   }
-        // } catch (error) {
-        //   console.error('Error fetching user data:', error);
-        //   clearUser();
-        // }
-        setUser({
-          uid: user.uid,
-          email: user.email!,
-          fullname: user?.displayName || '',
-        });
-      } else {
-        clearUser();
-      }
-    });
+ useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const authUser = await account.get();
+      console.log("auth",authUser)
+      const userDoc = await databases.getDocument(
+        conf.appwrite.databaseId,
+        conf.appwrite.usersCollectionId,
+        authUser.$id
+      );
 
-    return () => unsubscribe();
-  }, []);
+      setUser({
+        $id: userDoc.$id,
+        email: userDoc.email,
+        fullname: userDoc.fullname,
+        username: userDoc.username,
+        role: userDoc.role,
+      });
+
+    } catch (err) {
+      console.log("User not logged in",err);
+      clearUser();
+      navigate(URL.LOGIN);
+    }
+  };
+
+  checkAuth();
+}, []);
+
+
   return (
      <>
    <Toaster

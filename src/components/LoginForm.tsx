@@ -10,10 +10,12 @@ import CustomLoader from "@/lib/loader";
 import { URL } from "@/lib/URL";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { authService } from "@/firebase/auth-service";
+import { authService } from "@/appwrite/auth-service";
 // import { doc, getDoc } from "firebase/firestore";
 // import { db } from "@/firebase/firebaseConfig";
 import toast from "react-hot-toast";
+import { account, databases } from "@/appwrite/appwriteConfig";
+import { conf } from "@/lib/conf";
 
 
 const loginSchema = z.object({
@@ -38,55 +40,37 @@ const LoginForm = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    try {
-      const userCredential = await authService.signIn(data.email, data.password);
-      const user = userCredential.user;
-      // const userDoc = await getDoc(doc(db, 'users', user.uid));
-      
-      // if (userDoc.exists()) {
-      //   const userData = userDoc.data();
-      //   setUser({
-      //     uid: user.uid,
-      //     email: user.email!,
-      //     username: userData.username,
-      //     fullname: userData.fullname,
-      //     role: userData.role,
-      //   });
-        
-      //   toast.success("Login successful!");
-      //   navigate(URL.HOME); 
-      // } else {
-      //   toast.error("User data not found. Please contact support.");
-      // }
-      setUser({
-        uid: user.uid,
-        email: user.email!, 
-        // username: userDoc.data()?.username || '',
-        fullname: user?.displayName || '',
-        // role: userDoc.data()?.role || 'consumer',
-      })
-      navigate(URL.HOME);
-      toast.success("Login successful!");
-    } catch (error: any) {
-      console.error("Login error:", error);
-      
-      let errorMessage = "Failed to login. Please try again.";
-      
-      if (error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid email or password. Please try again.";
-      } else if (error.code === 'auth/user-not-found') {
-        errorMessage = "No account found with this email.";
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = "Incorrect password. Please try again.";
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = "Too many failed attempts. Please try again later.";
-      } else if (error.code === 'auth/user-disabled') {
-        errorMessage = "This account has been disabled. Please contact support.";
-      }
-      
-      toast.error(errorMessage);
+  try {
+    await authService.signIn(data.email, data.password);
+    const authUser = await account.get(); 
+    const userDoc = await databases.getDocument(
+      conf.appwrite.databaseId,
+      conf.appwrite.usersCollectionId,
+      authUser.$id
+    );
+    setUser({
+      $id: authUser.$id,
+      email: authUser.email!,
+      username: userDoc.username,
+      fullname: userDoc.fullname,
+      role: userDoc.role,
+    });
+
+    toast.success("Login successful!");
+    navigate(URL.HOME);
+  } 
+  catch (error: any) {
+    console.error("Login error:", error);
+
+    let errorMessage = "Failed to login.";
+
+    if (error.type === "user_invalid_credentials") {
+      errorMessage = "Invalid email or password.";
     }
-  };
+
+    toast.error(errorMessage);
+  }
+};
 
   return (
     <div className="w-full max-w-md mx-auto md:bg-white md:shadow-xl md:rounded-2xl p-4 md:p-8 md:border md:border-gray-200">

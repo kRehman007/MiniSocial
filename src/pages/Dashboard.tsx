@@ -1,6 +1,8 @@
+import CreatorHomePage from "./Creator/CreatorHomePage";
+
 const Dashboard = () => {
   return (
-    <div>Dashboard</div>
+   <CreatorHomePage />
   )
 }
 

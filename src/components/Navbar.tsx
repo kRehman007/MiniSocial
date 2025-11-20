@@ -9,30 +9,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
-import { LogOut, Plus, Menu, X, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { LogOut, Plus, Menu, X} from "lucide-react";
+import { Suspense, useState } from "react";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { authService } from "@/firebase/auth-service";
+import { authService } from "@/appwrite/auth-service";
 import toast from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import CustomLoader from "@/lib/loader";
+import CreatePostModal from "./modal/CreatePostModal";
 
 const Navbar = () => {
   const { clearUser, user } = useAuthStore();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -46,22 +35,6 @@ const Navbar = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!user) return;
-    setIsDeleting(true);
-    try {
-      await authService.deleteAccount()
-      clearUser();
-      toast.success("Account deleted successfully");
-      navigate(URL.LOGIN);
-    } catch (error) {
-      console.error("Delete account error:", error);
-      toast.error("Failed to delete account");
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
-  };
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
@@ -99,8 +72,9 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <div className="hidden lg:flex flex-1 justify-end items-center gap-6">
           {/* Create Post Button */}
-          {user && (
+          {user?.role?.toLowerCase()==="creator" && (
             <Button
+              onClick={() => setIsCreateModalOpen(true)}
               className="bg-green-600 cursor-pointer hover:bg-green-700 text-white flex items-center gap-2"
             >
               <Plus size={18} />
@@ -162,18 +136,6 @@ const Navbar = () => {
                   </div>
                 </DropdownMenuLabel>
 
-
-                <DropdownMenuSeparator />
-
-                {/* Delete Account Button */}
-                <DropdownMenuItem 
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 focus:text-red-700 focus:bg-red-50 flex items-center gap-2 px-4 py-2"
-                >
-                  <Trash2 size={16} />
-                  <span>Delete Account</span>
-                </DropdownMenuItem>
-
                 <DropdownMenuSeparator />
 
                 {/* Logout Button */}
@@ -229,22 +191,18 @@ const Navbar = () => {
                 </div>
 
                 {/* Mobile Menu Items */}
-                <Button
+                {
+                  user?.role?.toLowerCase()==="creator" && (
+               <Button
+                 onClick={() => setIsCreateModalOpen(true)}
                   className="w-full justify-center bg-green-600 hover:bg-green-700 text-white"
                 >
                   <Plus size={18} className="mr-2" />
                   Create Post
                 </Button>
-
-                {/* Delete Account Mobile */}
-                <Button
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  variant="ghost"
-                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 size={18} className="mr-2" />
-                  Delete Account
-                </Button>
+                )
+                }
+                
 
                 <div className="pt-2 border-t border-gray-200">
                   <Button
@@ -275,28 +233,12 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Delete Account Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete your account?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your account 
-              and remove all your data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting} className="cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteAccount}
-              disabled={isDeleting}
-              className="bg-red-600 cursor-pointer hover:bg-red-700 focus:ring-red-600"
-            >
-              {isDeleting ? <CustomLoader /> : "Delete Account"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
+      {isCreateModalOpen && (
+        <Suspense fallback={null}>
+          <CreatePostModal isOpen={isCreateModalOpen} setIsOpen={setIsCreateModalOpen}  />
+        </Suspense>
+      )}
     </>
   );
 };

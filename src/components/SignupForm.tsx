@@ -18,7 +18,7 @@ import CustomLoader from "@/lib/loader";
 import { URL } from "@/lib/URL";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { authService } from "@/firebase/auth-service";
+import { authService } from "@/appwrite/auth-service";
 import type { UserRole } from "@/lib/interface";
 import toast from "react-hot-toast";
 
@@ -69,18 +69,20 @@ const SignupForm = () => {
       navigate(URL.HOME);
     } catch (error: any) {
       console.error("Signup error:", error);
-      
-      let errorMessage = "Failed to create account. Please try again.";
-      
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "This email is already registered. Please use a different email.";
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = "Password is too weak. Please choose a stronger password.";
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = "Invalid email address. Please check your email.";
-      }
-      
-      toast.error(errorMessage);
+
+let errorMessage = "Failed to create account. Please try again.";
+
+if (error.type === "user_already_exists") {
+  errorMessage = "This email is already registered. Please use a different email.";
+} 
+else if (error.type === "general_argument_invalid") {
+  errorMessage = "Invalid input. Please check your email or password.";
+}
+else if (error.code === 500) {
+  errorMessage = "Server error. Please try again later.";
+}
+
+toast.error(errorMessage);
     }
   };
 
