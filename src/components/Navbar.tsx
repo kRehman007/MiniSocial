@@ -82,9 +82,9 @@ const Navbar = () => {
             </Button>
           )}
 
-          <Link to={URL.PROFILE} className="text-green-600 hidden md:block hover:text-gray-900">
+          {/* <Link to={URL.PROFILE} className="text-green-600 hidden md:block hover:text-gray-900">
           <CircleUser size={40} />
-          </Link>
+          </Link> */}
 
           {/* User Dropdown */}
           {user ? (
@@ -110,7 +110,7 @@ const Navbar = () => {
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={"https://github.com/shadcn.png"}
+                          src={user?.photoURL || "https://github.com/shadcn.png"}
                           alt={user?.fullname || user?.username}
                         />
                         <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
