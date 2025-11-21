@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { LogOut, Plus, Menu, X} from "lucide-react";
+import { LogOut, Plus, Menu, X,CircleUser} from "lucide-react";
 import { Suspense, useState } from "react";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { authService } from "@/appwrite/auth-service";
@@ -65,7 +65,7 @@ const Navbar = () => {
             onClick={() => navigate(URL.HOME)}
           >
             <img src="/Logo.png" className="w-6 h-auto object-contain bg-transparent" />
-            <h2 className="mt-0 text-lg font-semibold">Be Social</h2>
+            <h2 className="mt-0 text-lg font-semibold">CloudSnap</h2>
           </div>
         </div>
 
@@ -82,16 +82,20 @@ const Navbar = () => {
             </Button>
           )}
 
+          <Link to={URL.PROFILE} className="text-green-600 hidden md:block hover:text-gray-900">
+          <CircleUser size={40} />
+          </Link>
+
           {/* User Dropdown */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative cursor-pointer h-10 w-10 rounded-full p-0">
-                  <Avatar className="h-10 w-10 border border-gray-200">
+                  <Avatar className="h-12 w-12 border border-gray-200">
                     <AvatarImage
-                      src={"https://github.com/shadcn.png"}
-                      alt={user.fullname || user.username}
-                      className="object-cover"
+                      src={user?.photoURL || "https://github.com/shadcn.png"}
+                      alt={user?.fullname || user?.username}
+                      className="object-fit"
                     />
                     <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
                       {getUserInitials()}
@@ -104,10 +108,10 @@ const Navbar = () => {
                 <DropdownMenuLabel className="p-4">
                   <div className="flex flex-col space-y-3">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="h-12 w-12">
+                      <Avatar className="h-10 w-10">
                         <AvatarImage
                           src={"https://github.com/shadcn.png"}
-                          alt={user.fullname || user.username}
+                          alt={user?.fullname || user?.username}
                         />
                         <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                           {getUserInitials()}
@@ -137,6 +141,17 @@ const Navbar = () => {
                 </DropdownMenuLabel>
 
                 <DropdownMenuSeparator />
+                
+                {/* Profile Link */}
+                <DropdownMenuItem 
+                  asChild
+                  className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 flex items-center gap-2 px-4 py-2"
+                >
+                  <Link to={URL.PROFILE} className="w-full">
+                 <CircleUser />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
 
                 {/* Logout Button */}
                 <DropdownMenuItem 
@@ -202,6 +217,16 @@ const Navbar = () => {
                 </Button>
                 )
                 }
+                
+                {/* <Button asChild variant="ghost"
+                  className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 flex items-center gap-2 px-4 py-2"
+                > */}
+                  <Link to={URL.PROFILE} className="w-full
+                  flex gap-2 items-center px-4 hover:bg-gray-100 rounded-lg">
+                 <CircleUser size={16} />
+                    Profile
+                  </Link>
+                  {/* </Button> */}
                 
 
                 <div className="pt-2 border-t border-gray-200">

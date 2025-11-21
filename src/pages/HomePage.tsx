@@ -8,13 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash,  Heart, Send, MessageCircle } from "lucide-react";
+import { Trash,  Heart, Send, MessageCircle, MapPin } from "lucide-react";
 import CreatePostModal from "@/components/modal/CreatePostModal";
 import DeletePostModal from "@/components/modal/DeletePostModal";
 import type {  Post } from "@/lib/interface";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const CreatorHomePage = () => {
+const HomePage = () => {
   const { user } = useAuthStore();
   const { posts, setPosts, toggleLikePost,updatePost } = usePostStore();
  
@@ -26,6 +26,8 @@ const CreatorHomePage = () => {
   const [editingMedia, setEditingMedia] = useState<File | null>(null);
   const [isDeleteModalOpen,setIsDeleteModalOpen]=useState(false)
   const [postToDelete,setPostToDelete]=useState<Post | null>(null)
+  const [searchQuery,setSearchQuery]=useState("");
+  const [filteredPosts,setFilteredPosts]=useState<Post[]>([])
 
   // Comments modal state
   const [activeCommentModalPost, setActiveCommentModalPost] = useState<Post | null>(null);
@@ -50,6 +52,7 @@ const CreatorHomePage = () => {
         })
       );
       setPosts(postsWithComments as any);
+      setFilteredPosts(postsWithComments as any);
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch posts.");
@@ -59,7 +62,23 @@ const CreatorHomePage = () => {
   };
 
   useEffect(() => {
+    if(searchQuery.trim() === ""){
+      setFilteredPosts(posts);
+      return;
+    }
+    const filtered = posts.filter((post) =>
+      post.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredPosts(filtered);
+  }, [posts,searchQuery]);
+
+  useEffect(() => {
+    if(posts.length===0){
     fetchPosts();
+    }
+    else{
+      setFilteredPosts(posts);
+    }
   }, []);
 
   /* ---------- Post actions ---------- */
@@ -143,6 +162,13 @@ const CreatorHomePage = () => {
     </p>
   </div>
 
+  <div className="flex items-center justify-center max-w-xl mx-auto my-2 mb-5">
+    <Input type="search" placeholder="Search by title"
+    value={searchQuery} onChange={(e)=>setSearchQuery(e.target.value)}
+    />
+  </div>
+  {/* <hr className="mb-5 text-gray-100" /> */}
+
       <CreatePostModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
 
       {loading ?(
@@ -164,11 +190,17 @@ const CreatorHomePage = () => {
         </div>
       ):(
         <>
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {posts.map((post,index) => (
+         <div className="grid grid-cols-1 text-gray-500  md:grid-cols-3 gap-4">
+        {
+          filteredPosts?.length===0?(
+            <div className="flex flex-col gap-2 mt-4 items-center">
+            <p>No post found for "{searchQuery}"</p>
+          </div>
+          ):(
+            filteredPosts?.map((post,index) => (
           <article key={index} className="bg-white rounded-md shadow-sm overflow-hidden">
             {post.mediaURL && post.mediaType==="video" ? (
-              <video src={post.mediaURL} autoPlay controls className="w-full  h-[400px] object-contain" />
+              <video src={post.mediaURL} controls className="w-full  h-[400px] object-contain" />
             ) : (
               <img src={post.mediaURL} alt={post.title} className="w-full h-[400px] object-contain" />
             )}
@@ -188,7 +220,16 @@ const CreatorHomePage = () => {
                 )}
                 </span>
               </div>
-
+              {
+                post?.location && (
+                  <div className="flex gap-1 -ml-1 items-start -mt-1 mb-3">
+              <MapPin size={20} className="inline-block mr-1 -mt-0.5 md:mt-[1px] text-gray-500" />
+              <span className="text-xs md:text-sm text-gray-500">
+                {post?.location}
+              </span>
+              </div>
+                )
+              }
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
                   <button
@@ -214,7 +255,7 @@ const CreatorHomePage = () => {
                 <div className="flex items-center justify-end gap-0">
                   <div className="flex items-center gap-2 mr-4">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={"https://github.com/shadcn.png"} />
+                      <AvatarImage src={user?.photoURL || "https://github.com/shadcn.png"} />
                       <AvatarFallback>{user?.fullname?.charAt(0)}</AvatarFallback>
                     </Avatar>
                      {/* <div className="text-sm">{
@@ -245,7 +286,9 @@ const CreatorHomePage = () => {
               </div>
             </div>
           </article>
-        ))}
+        ))
+          )
+        }
       </div>
 
       {/* Edit Post Modal */}
@@ -320,9 +363,9 @@ const CommentsModal = ({ post, onClose, updatePost, refreshPostComments, modalLo
       text,
       likes: [],
       replies: [],
-      userName: user?.fullname || "You",
+      userName: user?.fullname || "",
+      userPhotoURL: user?.photoURL || "",
     };
-   console.log("post hia",post)
     // optimistic: update UI & store
     const optimisticUpdated = {
       ...localPost,
@@ -330,7 +373,8 @@ const CommentsModal = ({ post, onClose, updatePost, refreshPostComments, modalLo
       comments: [...(localPost.comments || []), optimistic],
     };
     try {
-      const saved = await PostService.addCommentToPost(post.$id, user?.username!, { userId: user?.$id!, text });
+      const saved = await PostService.addCommentToPost(post.$id, user?.username!, { userId: user?.$id!,
+         userPhotoURL: user?.photoURL || "",text });
       // replace optimistic with saved (match by text + userId + fallback)
       const replacedComments = optimisticUpdated.comments.map((c: any) =>
         c.$id === optimistic.$id ? saved : c
@@ -362,7 +406,8 @@ const CommentsModal = ({ post, onClose, updatePost, refreshPostComments, modalLo
                 <h3 className="font-semibold">{post.title}</h3> 
             <span className="text-sm flex gap-2 mt-0.5 text-red-600 items-center">
               {localPost?.commentsCount ?? localPost?.comments?.length ?? 0}
-              {" "} comments
+              {" "} 
+              {localPost?.commentsCount === 1 ? "Comment" : "Comments"}
               </span>
             </div>           
           </div>
@@ -445,6 +490,7 @@ const CommentList = ({ post, updateLocalPost }: any) => {
       postId: post.$id,
       parentCommentId: commentId,
       userId,
+      userPhotoURL: user?.photoURL || "",
       text,
       likes: [],
       userName: useAuthStore.getState().user?.username || "You",
@@ -456,7 +502,9 @@ const CommentList = ({ post, updateLocalPost }: any) => {
     
 
     try {
-      const saved = await PostService.addReplyToComment(post.$id, user?.username!, commentId, { userId, text });
+      const saved = await PostService.addReplyToComment(post.$id, user?.username!,
+        user?.photoURL || "",
+        commentId, { userId, text });
       // replace optimistic reply
       const replaced = updatedComments.map((c: any) =>
         c.$id === commentId
@@ -485,9 +533,15 @@ const CommentList = ({ post, updateLocalPost }: any) => {
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <div className="text-sm font-medium">{
+                <div className="flex gap-2 items-center">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={comment.userPhotoURL || "https://github.com/shadcn.png"} />
+                  <AvatarFallback>{comment.userName?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                  <p className="text-sm font-medium">{
                 user?.$id===comment?.userId?"You":
-                comment.userName || "User"}</div>
+                comment.userName || "User"}</p>
+                </div>
                 <div className="text-xs text-gray-400">{new Date(comment.$createdAt || Date.now()).toLocaleString()}</div>
               </div>
               <p className="text-sm mt-1">{comment.text}</p>
@@ -529,9 +583,15 @@ const CommentList = ({ post, updateLocalPost }: any) => {
                 <div className="mt-3 space-y-2 pl-4 border-l">
                   {comment.replies.map((r: any) => (
                     <div key={r.$id} className="text-sm">
-                      <div className="font-medium text-xs">{
-                      user?.$id===comment?.userId?"You":
-                r.userName || "User"}</div>
+                      <div className="flex gap-2 items-center">
+                          <Avatar className="h-6 w-6">
+                  <AvatarImage src={r.userPhotoURL || "https://github.com/shadcn.png"} />
+                  <AvatarFallback>{r.userName?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                      <p className="font-medium text-xs">{
+                      user?.$id===r?.userId?"You":
+                r.userName || "User"}</p>
+                </div>
                       <small>{r.text}</small>
                     </div>
                   ))}
@@ -599,4 +659,4 @@ const AddCommentRow = ({ onAdd, loading }: { onAdd: (text: string) => Promise<vo
   
 };
 
-export default CreatorHomePage;
+export default HomePage;

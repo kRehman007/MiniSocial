@@ -1,4 +1,5 @@
-import Dashboard from "../pages/Dashboard";
+import ProfilePage from "@/pages/ProfilePage";
+import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import SignupPage from "../pages/SignupPage";
 import type { RouteLayout } from "./interface";
@@ -17,7 +18,12 @@ export const AllRoutes:RouteLayout[]=[
     },
     {
     link:URL.HOME,
-    element:Dashboard,
+    element:HomePage,
+    isProtected:true
+    },
+    {
+    link:URL.PROFILE,
+    element:ProfilePage,
     isProtected:true
     },
 ]

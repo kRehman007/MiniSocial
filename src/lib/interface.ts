@@ -12,6 +12,9 @@ export interface User {
   username?: string;
   fullname?: string;
   role?: UserRole;
+  bio?: string;
+  photoURL?: string;
+  photoFileId?: string;
 }
 
 export interface Post {
@@ -26,6 +29,7 @@ export interface Post {
   likes: string[];
   commentsCount: number;
   comments: Comment[];
+  location?:string | null;
 }
 
 

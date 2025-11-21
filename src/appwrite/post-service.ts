@@ -10,7 +10,8 @@ const BUCKET_ID = conf.appwrite.bucketId as string;
 
 export const PostService = {
   // ------------------- ADD POST -------------------
-  async addPost(data: { userId: string; title: string; description: string; mediaFile: File,mediaType:string
+  async addPost(data: { userId: string; title: string; description: string; mediaFile: File,
+    mediaType:string,location?:string | null
    }) {
     if (!data.title || !data.description || !data.mediaFile) {
       throw new Error("All fields (title, description, mediaFile) are required.");
@@ -35,8 +36,8 @@ export const PostService = {
       mediaId: file.$id,
       likes: [] as string[],
       commentsCount: 0,
+      location: data.location || null,
     };
-
     const doc = await databases.createDocument(
       DATABASE_ID,
       POSTS_COLLECTION_ID,
@@ -77,12 +78,13 @@ export const PostService = {
   },
 
   // ------------------- COMMENTS & REPLIES -------------------
-  async addCommentToPost(postId: string, username:string, comment: { userId: string; text: string }) {
+  async addCommentToPost(postId: string, username:string, comment: { userId: string;userPhotoURL:string, text: string }) {
     if (!comment.text) throw new Error("Comment text is required");
 
     const newComment = {
       userName:username,
       postId,
+      userPhotoURL:comment.userPhotoURL || null,
       parentCommentId: null,
       userId: comment.userId,
       text: comment.text,
@@ -99,12 +101,15 @@ export const PostService = {
     return { id: doc.$id, ...newComment };
   },
 
-  async addReplyToComment(postId: string, username:string, parentCommentId: string, reply: { userId: string; text: string }) {
+  async addReplyToComment(postId: string, username:string,
+    userPhotoURL:string,
+    parentCommentId: string, reply: { userId: string; text: string }) {
     if (!reply.text) throw new Error("Reply text is required");
 
     const newReply = {
       userName:username,
       postId,
+      userPhotoURL:userPhotoURL || null,
       parentCommentId,
       userId: reply.userId,
       text: reply.text,
