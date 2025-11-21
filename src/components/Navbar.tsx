@@ -62,7 +62,10 @@ const Navbar = () => {
           </button>
           <div
             className="text-sm text-green-600 flex gap-2 items-center font-bold cursor-pointer"
-            onClick={() => navigate(URL.HOME)}
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate(URL.HOME)
+            }}
           >
             <img src="/Logo.png" className="w-6 h-auto object-contain bg-transparent" />
             <h2 className="mt-0 text-lg font-semibold">CloudSnap</h2>
@@ -185,7 +188,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={"https://github.com/shadcn.png"}
+                      src={user?.photoURL ||  "https://github.com/shadcn.png"}
                       alt={user.fullname || user.username}
                     />
                     <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">

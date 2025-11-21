@@ -18,19 +18,20 @@ const setUser = useAuthStore((state) => state.setUser);
   const checkAuth = async () => {
     try {
       const authUser = await account.get();
-      console.log("auth",authUser)
       const userDoc = await databases.getDocument(
         conf.appwrite.databaseId,
         conf.appwrite.usersCollectionId,
         authUser.$id
       );
-
       setUser({
         $id: userDoc.$id,
         email: userDoc.email,
         fullname: userDoc.fullname,
         username: userDoc.username,
         role: userDoc.role,
+        bio: userDoc.bio,
+        photoURL: userDoc.photoURL,
+        photoFileId: userDoc.photoFileId,
       });
 
     } catch (err) {

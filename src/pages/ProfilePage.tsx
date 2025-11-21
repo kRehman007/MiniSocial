@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Trash, Upload } from "lucide-react";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import toast from "react-hot-toast";
@@ -18,7 +18,7 @@ const ProfilePage: React.FC = () => {
   const [username, setUsername] = useState(user?.username || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState(user?.photoURL || "");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(user?.photoURL || null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
@@ -47,7 +47,6 @@ const ProfilePage: React.FC = () => {
     try {
       setIsUploadingPhoto(true);
       const fileId = ID.unique();
-
       // Upload new photo
       const response = await storage.createFile(
         conf.appwrite.bucketId as string,
@@ -76,6 +75,8 @@ const ProfilePage: React.FC = () => {
       );
 
       setPhotoPreview(newPhotoURL);
+      setPhotoFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       setUser({ ...user, photoURL: newPhotoURL, photoFileId: response.$id });
       toast.success("Photo uploaded successfully!");
     } catch (err: any) {
@@ -138,8 +139,10 @@ const ProfilePage: React.FC = () => {
             user.$id,
             { photoURL: "", photoFileId: "" }
           );
-          setPhotoPreview("");
+          setPhotoPreview(null);
           setUser({ ...user, photoURL: "", photoFileId: "" });
+          setPhotoFile(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
           toast.success("Photo deleted successfully!");
         } catch (err) {
           console.warn("Failed to delete previous photo:", err);
@@ -155,18 +158,25 @@ const ProfilePage: React.FC = () => {
 
       {/* Profile Photo */}
       <div className="flex flex-col justify-center items-center mb-6 relative">
-        <Avatar
-          className="w-20 h-20 md:h-28 md:w-28 cursor-pointer border-1 border-gray-200 transition"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {photoPreview ? (
-            <AvatarImage src={photoPreview || "https://github.com/shadcn.png"} />
+        {
+          photoPreview ? (
+            <img
+              src={photoPreview}
+              alt="Profile Preview"
+              className="w-20 h-20 md:h-28 md:w-28 rounded-full object-cover cursor-pointer border-1 border-gray-200"
+              onClick={() => fileInputRef.current?.click()}
+            />
           ) : (
-            <AvatarFallback className="flex justify-center items-center bg-gray-100 text-gray-400">
-              <Upload />
-            </AvatarFallback>
-          )}
-        </Avatar>
+            <Avatar
+              className="w-20 h-20 md:h-28 md:w-28 cursor-pointer border-1 transition"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <AvatarFallback className="flex justify-center items-center bg-gray-100 text-gray-400">
+                <Upload />
+              </AvatarFallback>
+            </Avatar>
+          )
+        }
         <input
           type="file"
           ref={fileInputRef}
@@ -189,7 +199,7 @@ const ProfilePage: React.FC = () => {
         {
           user?.photoURL && (
             <Button size="sm" variant="ghost"
-                    className="text-red-600 cursor-pointer hover:text-red-600"
+                    className="text-red-600 bg-gray-100 cursor-pointer hover:text-red-600"
                     onClick={handleDeletePhoto}>
                      {
                       isDeletingPhoto ? <CustomLoader /> : 

@@ -54,6 +54,9 @@ const LoginForm = () => {
       username: userDoc.username,
       fullname: userDoc.fullname,
       role: userDoc.role,
+      bio: userDoc.bio,
+      photoURL: userDoc.photoURL,
+      photoFileId: userDoc.photoFileId,
     });
 
     toast.success("Login successful!");

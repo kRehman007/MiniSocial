@@ -41,6 +41,9 @@ export const authService = {
       fullname,
       username,
       role,
+      bio: "",
+      photoURL: "",
+      photoFileId: "",
     };
   } catch (error) {
     console.log("Signup Error:", error);
