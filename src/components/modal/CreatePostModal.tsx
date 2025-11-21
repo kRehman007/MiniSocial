@@ -257,9 +257,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, setIsOpen }) 
             >
               {mediaPreview ? (
                 mediaFile?.type.startsWith("image/") ? (
-                  <img src={mediaPreview} className="object-cover h-full w-full" />
+                  <img src={mediaPreview} className="object-contain max-h-72 w-full" />
                 ) : (
-                  <video src={mediaPreview} controls className="object-cover h-full w-full" />
+                  <video src={mediaPreview} autoPlay controls className="object-cover max-h-72 w-full" />
                 )
               ) : (
                 <div className="flex flex-col items-center text-gray-400">
