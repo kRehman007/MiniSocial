@@ -221,8 +221,10 @@ const Navbar = () => {
                 {/* <Button asChild variant="ghost"
                   className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 flex items-center gap-2 px-4 py-2"
                 > */}
-                  <Link to={URL.PROFILE} className="w-full
-                  flex gap-2 items-center px-4 hover:bg-gray-100 rounded-lg">
+                  <Link to={URL.PROFILE}
+                  onClick={()=>setIsMobileMenuOpen(false)}
+                  className="w-full
+                flex gap-2 items-center px-4 py-2 hover:bg-gray-100 rounded-lg">
                  <CircleUser size={16} />
                     Profile
                   </Link>

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload } from "lucide-react";
+import { Trash, Upload } from "lucide-react";
 import { useAuthStore } from "@/zustand/useAuthStore";
 import toast from "react-hot-toast";
 import { ID, Permission, Role } from "appwrite";
@@ -21,7 +21,7 @@ const ProfilePage: React.FC = () => {
   const [photoPreview, setPhotoPreview] = useState(user?.photoURL || "");
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-
+  const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Preview uploaded photo
@@ -123,6 +123,32 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+
+  const handleDeletePhoto = async () => {
+    if (!user?.$id || !user?.photoFileId) {
+      toast.error("No photo to delete.");
+      return;
+    }
+     try {
+         setIsDeletingPhoto(true);
+          await storage.deleteFile(conf.appwrite.bucketId as string, user?.photoFileId);
+          await databases.updateDocument(
+            conf.appwrite.databaseId as string,
+            conf.appwrite.usersCollectionId as string,
+            user.$id,
+            { photoURL: "", photoFileId: "" }
+          );
+          setPhotoPreview("");
+          setUser({ ...user, photoURL: "", photoFileId: "" });
+          toast.success("Photo deleted successfully!");
+        } catch (err) {
+          console.warn("Failed to delete previous photo:", err);
+        }
+        finally{
+          setIsDeletingPhoto(false);
+        }
+  }
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-2xl shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-6 text-green-800">Edit Profile</h2>
@@ -134,7 +160,7 @@ const ProfilePage: React.FC = () => {
           onClick={() => fileInputRef.current?.click()}
         >
           {photoPreview ? (
-            <AvatarImage src={photoPreview} />
+            <AvatarImage src={photoPreview || "https://github.com/shadcn.png"} />
           ) : (
             <AvatarFallback className="flex justify-center items-center bg-gray-100 text-gray-400">
               <Upload />
@@ -150,15 +176,29 @@ const ProfilePage: React.FC = () => {
             if (e.target.files && e.target.files[0]) setPhotoFile(e.target.files[0]);
           }}
         />
-        <Button
+        <div className="flex mt-3  gap-2 items-center">
+          <Button
           size="sm"
           variant="outline"
-          className={`mt-3 text-xs md:text-sm cursor-pointer min-w-28 ${isUploadingPhoto ? "bg-gray-300" : ""}`}
+          className={`text-xs md:text-sm cursor-pointer min-w-28 ${isUploadingPhoto ? "bg-gray-300" : ""}`}
           disabled={isUploadingPhoto}
           onClick={handleUploadPhoto}
         >
           {isUploadingPhoto ? <CustomLoader /> : "Click to Upload Photo"}
         </Button>
+        {
+          user?.photoURL && (
+            <Button size="sm" variant="ghost"
+                    className="text-red-600 cursor-pointer hover:text-red-600"
+                    onClick={handleDeletePhoto}>
+                     {
+                      isDeletingPhoto ? <CustomLoader /> : 
+                       <Trash size={16} />
+                     }
+                    </Button>
+          )
+        }
+        </div>
       </div>
 
       {/* Form Fields */}
